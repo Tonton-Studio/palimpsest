@@ -4,74 +4,79 @@
 > À lire en premier via `/tts_takeover`.
 
 ## Date de la dernière session
-**2026-04-15** — Session 0 (Setup workflow TTS)
+**2026-04-15** — Session 1 (Phase 1 Squelette + init dépôt git)
 
 ## Où on s'est arrêtés
-Fin de la Phase 0 (Setup). Tout le workflow TontonStudio a été adapté depuis le clone Dice Mafia, l'arborescence du projet est propre, les stubs docs sont prêts. Aucune ligne de code JSX écrite — prochain step : attaquer la Phase 1 (Squelette) dans une nouvelle session pour repartir avec un contexte frais (le GDD fait 30 Ko et mérite une relecture complète).
+Phase 1 (Squelette) codée intégralement dans `src/Palimpsest.jsx` (1020 lignes). Le dépôt git local est initialisé et poussé sur le remote privé `Tonton-Studio/palimpsest` (main, 3 commits). Les docs de conception (`CHAMBER_DEFINITIONS.md`, `INTERPRETATION_PROMPT.md`) sont remplies depuis le GDD §3 et §4. Sanctuarisation effectuée avec backup milestone `phase1_squelette_git_init`.
+
+**Non testé** : rendu réel dans un artifact Claude.ai, cycle complet de réécriture avec API vivante. C'est la toute première priorité de la session suivante avant d'attaquer Phase 2.
 
 ## État actuel du projet
-- **Phase en cours** : **Phase 1 — Squelette** (2-3h estimées selon GDD)
-- **Fichier source principal** : `src/Palimpsest.jsx` — **pas encore créé**, répertoire `src/` vide et prêt
-- **Dernière Chambre implémentée** : aucune
-- **Nombre de Chambres fonctionnelles** : 0 / 7
-- **Stack confirmé** : React JSX single-file artifact, SVG, CSS animations, API Anthropic (claude-sonnet-4-20250514), `window.storage` (clé `palimpsest-world`)
+- **Phase en cours** : **fin de Phase 1 — validation manuelle à faire** / prête à passer en Phase 2 dès que le rendu est vérifié
+- **Fichier source principal** : `src/Palimpsest.jsx` (1020 lignes, single-file)
+- **Chambres implémentées** : 7 / 7 (données canoniques complètes dans `CHAMBERS_INITIAL`)
+- **Chambres rendues avec visuels distincts** : 7 / 7 (rendu naïf SVG, fin-tuning en Phase 2)
+- **Stack confirmé** : React JSX single-file + SVG + CSS animations + API Anthropic (claude-sonnet-4-20250514) via `window.claude.complete` (artifact) ou `fetch` (standalone)
+- **Repo** : `https://github.com/Tonton-Studio/palimpsest` (privé), branche `main`
 
-## Ce qui fonctionne (Setup)
-- `CLAUDE.md` projet en place (SSOT technique + créatif) — **ne pas modifier la vision**
-- `PALIMPSEST_GDD.md` à la racine (SSOT design absolu, conçu par Claude Opus 4.6, intouchable)
-- `.claude/commands/` (17 commandes TTS adaptées depuis Dice Mafia : tts_takeover, tts_handover, tts_sanctuarize, tts_hardcoredebug, tts_aihelp, tts_aihelp_followup, tts_todo, tts_todoupdate, epct, INTER_COMMANDS_COHERENCE + 7 dans spec/)
-- `_DEV_/auto-backup.sh` adapté : source = racine projet, destination = `_DEV_/backups/{daily|milestones|golden|misc}/`, check GDD+CLAUDE.md au lieu de package.json. Syntaxe bash validée.
-- `deploy.sh` stub (pas de build serveur, distribution manuelle via copie artifact)
-- `TODO_GLOBAL.md` : roadmap des 6 phases, Phase 0 cochée
-- `docs/INTERPRETATION_PROMPT.md` + `docs/CHAMBER_DEFINITIONS.md` : stubs structurés, prêts à remplir depuis GDD §3 et §4
+## Ce qui fonctionne (Session 1)
+- **Architecture** : `useReducer` complet, actions `SET_CHAMBER`, `START_EDIT`, `CANCEL_EDIT`, `REWRITE_START`, `REWRITE_APPLY`, `REWRITE_ERROR`, `CLEAR_INK_MESSAGE`, `CLOSE_OPENING`, `TOGGLE_HELP`
+- **Composants** : `App` → `ChamberBackground` + `Shape` (8 formes × 9 behaviors), `Inscription` (avec Trace filigrane opacité 0.15), `InscriptionEditor` (200 chars, Escape/Enter), `Ink` + `InkMessage` (lettre par lettre 35ms, fade 8s), `ConnectionLinks`, `HelpPanel`, `OpeningScreen`
+- **API** : `callInterpretation` avec détection runtime `window.claude.complete` → fallback `fetch`. Parsing défensif (enum + clamp + bornes) + rollback gracieux → L'Encre dit "les mots résistent... réessaie"
+- **Rate limit** : cooldown 5 s + max 3 réécritures/min (fenêtre glissante 60 s)
+- **Visuel** : keyframes `palimpsestPulse` (opacité 0.85 ↔ 1.0, 4 s), transitions `background 2.5s ease-in-out`, nom de Chambre en filigrane géant opacité 0.05
+- **Fonts** : Cormorant Garamond + Lora injectées runtime via `document.head.appendChild`
 
 ## Ce qui reste à faire (priorités session prochaine)
 
-**Avant de coder** :
-1. **Relire GDD §3 (Les 7 Chambres)** et remplir `docs/CHAMBER_DEFINITIONS.md` avec les 2-3 Inscriptions initiales de chaque Chambre + données visuelles
-2. **Relire GDD §4 (Interprétation)** et finaliser `docs/INTERPRETATION_PROMPT.md` avec le prompt système exact
+### Avant d'attaquer Phase 2
+1. **Coller `src/Palimpsest.jsx` dans un artifact Claude.ai** (ou preview HTML équivalent) et valider le rendu à l'œil :
+   - Chambre SEUIL s'affiche, filigrane "SEUIL" géant en fond, 2 Inscriptions centrées, mots-liens GRAVITÉ/TEMPS en bas
+   - Opening screen cliquable → disparaît
+   - Clic sur une Inscription → éditeur s'ouvre avec filigrane original
+   - Bouton "?" → panneau d'aide
+   - Soumettre une réécriture → `window.claude.complete` est appelé → visuals mutent → L'Encre s'exprime
+2. **Corriger les bugs éventuels** découverts au rendu (rappel GDD : les bugs visuels *intéressants* sont des features — ne corriger que si ça casse le jeu)
 
-**Phase 1 — Squelette** (voir TODO_GLOBAL.md pour la checklist fine) :
-- Setup React single-file JSX (imports CDN : React, lucide-react, Google Fonts Cormorant Garamond + Lora)
-- Structure des composants selon l'arbo du CLAUDE.md (`App`, `Chamber`, `Inscription`, `InscriptionEditor`, `Ink`, `ChamberBackground`…)
-- `useReducer` avec state initial (voir CLAUDE.md "Gestion d'état")
-- Rendu SVG Chambre SEUIL de base
-- Inscriptions affichées (Playfair/Cormorant, pulse opacité 0.85-1.0 sur 4s)
-- Panneau d'édition (max 200 chars, filigrane original opacité 0.15)
-- Premier appel API Anthropic avec le prompt d'interprétation (claude-sonnet-4-20250514, max_tokens 1000, JSON strict)
-- Application naïve des `visual_changes` au rendu
+### Phase 2 — Monde vivant (3-4h estimées)
+- Affiner les 7 rendus SVG (chaque Chambre doit avoir une identité visuelle forte, pas juste des primitives)
+- `TransitionOverlay` : fondu 2-3 s ease-in-out entre Chambres
+- Application fine des `visual_changes` (background_gradient, couleurs dynamiques, particules)
+- Connexions dynamiques (déjà câblées côté reducer, à visualiser quand elles changent)
+
+### Décisions techniques à trancher
+- **`window.claude.complete` vs `fetch`** : aujourd'hui fallback runtime. Arbitrage Phase 6 selon cible primaire (artifact vs itch.io).
 
 ## Bugs connus / points d'attention
-- **Rappel GDD** : les bugs visuels intéressants sont des features. Ne corriger que si ça casse le jeu.
-- **Rappel GDD** : en cas d'ambiguïté technique, choisir l'option la plus poétique/surprenante/belle.
-- **Rate limit API** : 3 réécritures/minute max côté jeu. Prévoir feedback "le monde réfléchit..." pendant le chargement dès la Phase 1.
-- **Erreurs API** : try-catch obligatoire, fallback gracieux (L'Encre : "les mots résistent... réessaie").
-- **NEVER** localStorage/sessionStorage — uniquement `window.storage`.
-- **NO `<form>` tags** en React artifact — onClick/onChange uniquement.
+- **Non validé en artifact** : tout le rendu est théorique tant qu'on n'a pas collé le fichier dans un artifact Claude.ai. Risque principal : erreur de syntaxe JSX silencieuse ou import React mal exposé dans l'environnement cible.
+- **Rappel GDD** : bugs visuels intéressants = features. Ne corriger que si ça casse le jeu.
+- **Rappel GDD** : ambiguïté technique → option la plus poétique/surprenante/belle.
+- **Rate limit API** : 3 réécritures/min côté jeu, indépendant du rate limit Anthropic. Message "le monde réfléchit…" déjà câblé sur le bouton "réécrire" pendant `loading`.
+- **NEVER** localStorage/sessionStorage — `window.storage` uniquement (à câbler Phase 4).
+- **NO `<form>` tags** — confirmé OK dans le code actuel (textarea + boutons directs).
 
 ## Décisions créatives récentes
-- Claude = directeur créatif, Nordine = exécutant fidèle. Si un choix du GDD semble sous-optimal, l'implémenter tel quel et noter `// FEEDBACK: ...` dans le code pour synthèse en fin de phase (pas de correction de la vision).
+- **Nom du repo** : `palimpsest` tout court (décision de Claude comme directeur créatif). Cohérent avec l'esthétique minimaliste du jeu.
+- Divergence fetch/window.claude.complete non considérée comme design drift (contrainte d'exécution, pas vision créative).
 
-## Fichiers touchés en dernier (session Setup)
-- Créés : `REPRISE_SESSION_PROCHAINE.md`, `TODO_GLOBAL.md`, `docs/INTERPRETATION_PROMPT.md`, `docs/CHAMBER_DEFINITIONS.md`, `src/` (dossier vide), `.claude/` (complet depuis DiceMafia puis adapté)
-- Modifiés : `_DEV_/auto-backup.sh`, `deploy.sh`, tous les `.claude/commands/**.md`, `.claude/settings.local.json`
-- Non modifiés (intentionnel) : `CLAUDE.md`, `PALIMPSEST_GDD.md`
+## Fichiers touchés en dernier (Session 1)
+- Créés : `src/Palimpsest.jsx`, `.gitignore`, `.git/` (repo + remote origin)
+- Remplis : `docs/CHAMBER_DEFINITIONS.md`, `docs/INTERPRETATION_PROMPT.md`
+- Modifiés : `TODO_GLOBAL.md` (Phase 1 cochée + feedback), `CLAUDE.md` (section Session 1), `REPRISE_SESSION_PROCHAINE.md` (ce fichier)
+- Non modifiés : `PALIMPSEST_GDD.md` (SSOT intouchable)
 
-## Notes diverses
-
-- **Point à valider plus tard** : `.claude/settings.local.json` a été élargi en wildcard `git push origin:*` (l'original restreignait à une branche DiceMafia spécifique). À restreindre à `main` ou autre une fois un repo git initialisé pour PALIMPSEST.
-- **Pas de repo git pour l'instant** — le projet n'est pas encore versionné. À décider si on init un repo avant ou après Phase 1.
-- **Backup milestone recommandé avant Phase 1** : `cd _DEV_ && ./auto-backup.sh milestone setup_phase0_complete` pour figer l'état propre du workspace avant la première ligne de JSX.
-- Le dossier `backups/` à la racine a été supprimé par Nordine (snapshots hors-procédure hérités de DiceMafia, sans valeur). Les backups procéduraux vivent dans `_DEV_/backups/`.
+## Backups & sanctuarisation
+- `_DEV_/backups/milestones/2026/15-avril/setup_phase0_complete_20260415_091347/` (début session)
+- `_DEV_/backups/milestones/2026/15-avril/phase1_squelette_git_init_20260415_095026/` (fin session)
+- Remote GitHub : `https://github.com/Tonton-Studio/palimpsest` privé, branche `main`
 
 ---
 
 ## Pour la prochaine session — commandes à lancer
 
 ```bash
-# 1. Backup milestone (à faire MANUELLEMENT avant d'ouvrir la nouvelle session)
-cd _DEV_ && ./auto-backup.sh milestone setup_phase0_complete
-
-# 2. Dans la nouvelle session Claude Code :
+# Dans la nouvelle session Claude Code :
 /tts_takeover
 ```
+
+Puis première action concrète : coller `src/Palimpsest.jsx` dans un artifact Claude.ai pour validation visuelle.

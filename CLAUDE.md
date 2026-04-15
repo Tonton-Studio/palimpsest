@@ -193,6 +193,20 @@ palimpsest/
 - Setup projet, CLAUDE.md, GDD finalisé
 - Prêt pour Phase 1
 
+### Session 1 - Phase 1 Squelette + init dépôt (2026-04-15)
+- Repo git local + remote privé `Tonton-Studio/palimpsest` (3 commits main)
+- `docs/CHAMBER_DEFINITIONS.md` et `docs/INTERPRETATION_PROMPT.md` remplis depuis GDD §3 et §4
+- `src/Palimpsest.jsx` créé (1020 lignes, single-file) :
+  - `useReducer` GDD-compliant (7 Chambres, companion, stats, ui)
+  - `ChamberBackground` SVG + `Shape` (8 primitives × 9 behaviors)
+  - `Inscription` + Trace filigrane, `InscriptionEditor` 200 chars
+  - `Ink` + `InkMessage` lettre par lettre 8s
+  - `ConnectionLinks`, `HelpPanel`, `OpeningScreen`
+  - `callInterpretation` avec fallback `window.claude.complete` ↔ `fetch`
+  - Cooldown 5s + rate limit 3/min actifs
+- **FEEDBACK P1 consigné** : divergence GDD §10 `fetch` direct vs artifact CORS → fallback runtime. À arbitrer Phase 6.
+- Validation manuelle artifact + cycle réécriture API = non testés (Phase 2)
+
 ## Points d'attention
 - **Rate limiting API** : 3 appels/minute max côté jeu. Prévoir feedback visuel "le monde réfléchit..." pendant le chargement.
 - **Taille du contexte API** : l'historique des réécritures envoyé à l'API va grossir. Prévoir un résumé/troncature après ~50 réécritures pour rester dans les limites de tokens.
