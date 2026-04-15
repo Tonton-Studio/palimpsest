@@ -21,16 +21,18 @@
 - [x] TODO_GLOBAL.md (ce fichier)
 - [x] docs/ stubs (INTERPRETATION_PROMPT.md, CHAMBER_DEFINITIONS.md)
 
-## Phase 1 — Squelette (2-3h)
-- [ ] Setup React single-file JSX (imports CDN : React, lucide-react, Cormorant Garamond, Lora)
-- [ ] Structure des composants (App, Chamber, Inscription, InscriptionEditor, Ink…)
-- [ ] useReducer avec state initial (chambers, companion, stats, ui)
-- [ ] Rendu SVG Chambre SEUIL avec visuels de base
-- [ ] Inscriptions affichées (texte cliquable, Playfair/Cormorant, opacité pulse 0.85-1.0)
-- [ ] Panneau d'édition d'Inscription (champ texte max 200 chars, filigrane original)
-- [ ] Appel API Anthropic basique (fetch, model claude-sonnet-4-20250514, max_tokens 1000)
-- [ ] Parsing JSON de la réponse (visual_changes, connection_changes, side_effects, companion_reaction, paradox)
-- [ ] Application naïve des visual_changes au rendu SVG
+## Phase 1 — Squelette (2-3h) — en cours 2026-04-15
+- [x] Setup React single-file JSX (Google Fonts Cormorant Garamond + Lora, injection runtime)
+- [x] Structure des composants (App, Chamber*, Inscription, InscriptionEditor, Ink, ConnectionLinks, HelpPanel, OpeningScreen)
+- [x] useReducer avec state initial (chambers, companion, stats, ui)
+- [x] Rendu SVG Chambre SEUIL avec visuels de base (+ les 6 autres en données canoniques)
+- [x] Inscriptions affichées (texte cliquable, Cormorant, pulse keyframes 0.85-1.0 sur 4s)
+- [x] Panneau d'édition d'Inscription (champ texte max 200 chars, filigrane original opacité 0.15)
+- [x] Appel API (fallback `window.claude.complete` ↔ fetch api.anthropic.com, model claude-sonnet-4-20250514, max_tokens 1000) — voir `// FEEDBACK:` dans le code
+- [x] Parsing JSON de la réponse (visual_changes, connection_changes, side_effects, companion_reaction, paradox)
+- [x] Application naïve des visual_changes au rendu SVG (mergeVisuals + validation enum/bornes)
+- [ ] Validation manuelle dans un artifact Claude.ai ou via preview HTML
+- [ ] Test réel d'un cycle réécriture complet avec API vivante
 
 ## Phase 2 — Monde vivant (3-4h)
 - [ ] 7 Chambres avec visuels SVG distincts (SEUIL, GRAVITÉ, TEMPS, SILENCE, MIROIR, ÉCHO, PROFONDEUR)
@@ -75,7 +77,7 @@
 ## Hors roadmap
 
 ### Feedback récoltés durant l'implémentation
-_(à remplir par synthèse des `// FEEDBACK:` du code)_
+- **FEEDBACK P1** (src/Palimpsest.jsx, `callInterpretation`) : le GDD §10 prescrit un `fetch` direct vers `api.anthropic.com`. Dans un artifact Claude.ai, les appels CORS sont bloqués — on doit utiliser `window.claude.complete`. Implémentation actuelle : détection runtime (si `window.claude.complete` existe → artifact, sinon → fetch standalone pour itch.io). À arbitrer Phase 6. La vision créative n'est pas touchée (c'est juste une contrainte d'exécution).
 
 ### Idées bonus
 _(à remplir)_
