@@ -39,7 +39,16 @@ Commande de transmission ultra-précise du travail en cours pour assurer une con
 
 - Lire `PALIMPSEST_GDD.md` et vérifier que les modifications de la session sont conformes
 - Si une déviation a été faite : la documenter explicitement dans REPRISE_SESSION_PROCHAINE.md avec la raison
-- **RAPPEL CRITIQUE** : Ne JAMAIS modifier la vision créative du GDD. Si un choix de design semble problématique, l'implémenter tel quel et noter le problème pour le feedback final.
+- **RAPPEL CRITIQUE** : Le GDD v1 est gelé (rien n'y est modifié). Claude, directeur créatif, écrit ses révisions dans une couche v2 par-dessus. Nordine ne modifie jamais la vision créative : si un choix semble problématique, il l'implémente et le note pour le feedback.
+
+### Phase 2a - Journal de l'expérimentation OBLIGATOIRE
+
+**Objectif** : clore l'entrée de session selon `journal/README.md`
+
+- Vérifier que `journal/transcripts/` contient la transcription de la session (sinon lancer `python3 -I .claude/hooks/export_transcript.py <chemin du .jsonl>`)
+- Compléter `journal/sessions/AAAA-MM-JJ_session-NN.md` sur toute la grille (faits, décisions, écarts, erreurs, mémoire, coût, inversion des rôles avec contre-lectures, citations, limites), reporter le coût depuis l'en-tête de la transcription, passer le statut à `close`
+- Ajouter au `journal/REGISTRE_DES_DECISIONS.md` toute décision de la session qui n'y figure pas encore
+- Ne jamais écrire la section « Contrepoint de Nordine »
 
 ### Phase 2b - Mise a Jour Memoire Projet
 
@@ -113,7 +122,7 @@ Bonjour Claude ! Cette session fait suite à un handover précis. Avant de repre
 
 **LECTURE OBLIGATOIRE** :
 1. CLAUDE.md - Règles critiques
-2. PALIMPSEST_GDD.md - Vision créative (SSOT game design, NE PAS MODIFIER)
+2. PALIMPSEST_GDD.md - Vision créative (GDD v1 gelé + couche v2 éventuelle)
 3. REPRISE_SESSION_PROCHAINE.md - Etat exact travail en cours
 4. TODO_GLOBAL.md - Roadmap et priorisation
 

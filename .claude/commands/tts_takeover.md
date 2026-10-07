@@ -24,8 +24,9 @@ Commande de prise en main autonome et intelligente du projet en l'absence de bri
 
 **Ordre de lecture obligatoire** :
 
-1. **PALIMPSEST_GDD.md** - SINGLE SOURCE OF TRUTH game design (7 Chambres, Inscriptions, mécanique de Réécriture, L'Encre, Traces, Révélation, scope v1.0). TOUTE déviation par rapport au GDD doit être signalée en ALERTE. **NE PAS MODIFIER** la vision créative.
+1. **PALIMPSEST_GDD.md** - GDD v1, gelé (7 Chambres, Inscriptions, mécanique de Réécriture, L'Encre, Traces, Révélation, scope v1.0), puis la couche v2 si elle existe. TOUTE déviation non décidée par le directeur créatif doit être signalée en ALERTE.
 2. **CLAUDE.md** - Instructions et règles critiques du projet
+2b. **journal/REGISTRE_DES_DECISIONS.md** et la dernière entrée de `journal/sessions/` - qui a décidé quoi, ce qui s'est passé. Si la dernière entrée n'est pas `close`, la compléter depuis `journal/transcripts/` et la marquer « reconstruite après coup ». Puis ouvrir l'entrée de la nouvelle session (protocole `journal/README.md`).
 3. **TODO_GLOBAL.md** - SOURCE UNIQUE DE VERITE pour les tâches :
    - Lire TOUTES les tâches `[ ]` non cochées
    - Identifier les phases (Phase 1 Squelette -> Phase 6 Polish) et leur avancement

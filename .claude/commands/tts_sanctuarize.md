@@ -16,7 +16,7 @@ Commande de sanctuarisation complète après une feature développée avec succ�
 
 **A CHAQUE sanctuarisation, vérifier et mettre à jour OBLIGATOIREMENT :**
 
-- **PALIMPSEST_GDD.md** : SSOT game design. NE PAS MODIFIER la vision créative. Vérifier que le code livré est ALIGNE avec le GDD. Signaler tout écart.
+- **PALIMPSEST_GDD.md** : GDD v1 gelé, révisions du directeur créatif dans une couche v2. Vérifier que le code livré est ALIGNE avec le GDD. Signaler tout écart.
 - **TODO_GLOBAL.md** : Cocher tâches terminées, ajouter nouvelles, MAJ progression
 - **CLAUDE.md** : Section "Sessions" TOUJOURS + règles critiques si nouvelles
 - **REPRISE_SESSION_PROCHAINE.md** : Prochaines priorités
@@ -100,6 +100,12 @@ ls -la "$BACKUP_DIR/src/Palimpsest.jsx" 2>/dev/null
 - Remplacer le contenu avec les nouvelles priorités
 - Documenter les prochaines étapes
 - Mentionner tout bug connu ou point d'attention
+
+### 7b. Journal de l'expérimentation OBLIGATOIRE
+
+- Mettre à jour l'entrée `journal/sessions/AAAA-MM-JJ_session-NN.md` avec l'étape sanctuarisée (décisions, erreurs, écarts au protocole, coût à date) selon la grille de `journal/README.md`
+- Compléter `journal/REGISTRE_DES_DECISIONS.md`
+- Inclure `journal/sessions/` et `journal/REGISTRE_DES_DECISIONS.md` dans le commit de sanctuarisation. **Jamais `journal/transcripts/`** (privé, exclu par `.gitignore`)
 
 ### 8. Synchronisation Mémoire Projet
 
@@ -185,7 +191,7 @@ A la fin, présenter directement dans le chat un prompt complet pour la prochain
 
 **LECTURE OBLIGATOIRE** :
 - CLAUDE.md - Instructions et règles critiques
-- PALIMPSEST_GDD.md - Vision créative (SSOT, NE PAS MODIFIER)
+- PALIMPSEST_GDD.md - Vision créative (GDD v1 gelé + couche v2 éventuelle)
 - TODO_GLOBAL.md - Roadmap et tâches prioritaires
 - REPRISE_SESSION_PROCHAINE.md - Contexte session actuelle
 

@@ -30,3 +30,13 @@ _DEV_/config.local.js
 # Build output (si un jour export itch.io)
 dist/
 build/
+
+# Journal : log du hook d export
+.claude/hooks/*.log
+
+# Publication (option B, décidée le 2026-10-07) : le code, le GDD et le journal analysé seront publics.
+# Les transcriptions brutes (paroles de Nordine mot pour mot) et la préparation de candidature restent privées :
+# jamais versionnées, pour que l'historique git ne les expose pas le jour où le dépôt devient public.
+journal/transcripts/
+candidature/
+.playwright-mcp/

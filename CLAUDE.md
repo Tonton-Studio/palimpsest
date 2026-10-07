@@ -14,8 +14,8 @@ Target: Web (artifact React Claude.ai en primaire, itch.io export HTML en second
 - **Expérience**: Jeu conçu par une IA pour elle-même, réalisé fidèlement par un humain sans modification de la vision créative
 
 ## Critical Rules
-- **NEVER** modifier la vision créative du GDD. Si un choix de design semble problématique, l'implémenter tel quel et noter le problème pour le feedback final.
-- **GDD PALIMPSEST_GDD.md** est la source de vérité absolue pour le game design. Claude est le directeur créatif. Nordine exécute sans modifier.
+- **Claude est le directeur créatif. Nordine exécute.** Depuis le 2026-10-07, Nordine l'a confirmé explicitement : « c'est toi qui décide puisque c'est TON jeu ». Claude **tranche lui-même** les questions créatives (visuel, texte, game design) et ne les renvoie pas à Nordine. Il le consulte sur l'agenda, l'administratif et ce qui engage Nordine personnellement.
+- **Le GDD v1 (`PALIMPSEST_GDD.md`) est gelé : on n'y efface ni n'y modifie rien.** Les révisions du directeur créatif s'écrivent dans une couche suivante (GDD v2), par-dessus, en laissant v1 lisible. Nordine ne modifie jamais la vision créative : si un choix semble problématique, il l'implémente et le note pour le feedback.
 - **En cas d'ambiguïté technique**, choisir l'option la plus poétique/surprenante/belle.
 - **Les bugs visuels intéressants sont des features.** Ne corriger que si ça casse le jeu.
 - **Le silence est un matériau.** Ne pas remplir les vides.
@@ -25,19 +25,44 @@ Target: Web (artifact React Claude.ai en primaire, itch.io export HTML en second
 - Les appels API Anthropic utilisent **claude-sonnet-4-20250514**, max_tokens 1000.
 - Persistance via **window.storage** (clé principale : `palimpsest-world`).
 
+## Journal de l'expérimentation — PROTOCOLE PERMANENT (depuis le 2026-10-07)
+
+L'expérience (une IA dirige, un humain exécute) compte autant que le jeu. **Chaque session est documentée, sans exception.** Procédure complète et grille d'analyse : `journal/README.md`.
+
+1. **Automatique** : le hook `Stop` / `SessionEnd` (`.claude/settings.json`) exporte la transcription dans `journal/transcripts/` (**privée, jamais versionnée**). Ne jamais l'éditer à la main.
+2. **Dès le premier échange de fond** : ouvrir `journal/sessions/AAAA-MM-JJ_session-NN.md` (gabarit dans le README) et le tenir à jour **à chaque jalon** (décision, livraison, erreur, écart au protocole), pas seulement en fin de session.
+3. **Chaque décision** qui engage le jeu ou l'expérience va dans `journal/REGISTRE_DES_DECISIONS.md` : qui en a eu l'initiative, qui l'a tranchée, conforme ou non au protocole d'inversion.
+4. **Analyse objective** : faits séparés des interprétations, une contre-lecture pour chaque observation, erreurs de Claude consignées en premier, limites de l'analyse explicites. La section « Contrepoint de Nordine » n'est jamais écrite par Claude.
+5. **Clôture** à `/tts_handover` ou `/tts_sanctuarize` ; **lecture** à `/tts_takeover` (registre + dernière entrée, à compléter si elle n'a pas été close).
+
+## Candidature Garage IAG 2027
+Nordine candidate avec PALIMPSEST à la résidence Garage IAG 2027 (Game Créalab, Bordeaux, soutien CNC). Date limite officielle : 15 novembre 2026 à minuit ; **dépôt prévu le 6 novembre** (décision de Nordine). Préparation : `candidature/garage-iag-2027/README.md` (**local, jamais versionné**). Dates de résidence marquées `[TBD]` dans l'agenda jusqu'aux résultats du 15 décembre.
+
+**Publication (option B)** : code, GDD, entrées du journal et registre deviendront publics avant le dépôt, après relecture du journal par Nordine. Transcriptions brutes et candidature restent privées.
+
 ## Architecture
 
 ```
 palimpsest/
 ├── CLAUDE.md                    # Ce fichier (contexte projet pour Claude Code)
-├── PALIMPSEST_GDD.md            # Game Design Document (SSOT design - NE PAS MODIFIER)
+├── PALIMPSEST_GDD.md            # GDD v1 (Claude Opus 4.6) - GELÉ, les révisions vont dans une couche v2
 ├── src/
 │   └── Palimpsest.jsx           # Application React single-file (artifact)
 ├── docs/
 │   ├── INTERPRETATION_PROMPT.md  # Prompt système pour l'API d'interprétation (ref GDD §4)
 │   └── CHAMBER_DEFINITIONS.md   # Données des 7 Chambres (inscriptions, visuels, connexions)
+├── journal/                     # Journal de l'expérimentation (protocole permanent, voir README)
+│   ├── README.md                # Procédure, grille d'analyse, règles d'honnêteté, gabarit
+│   ├── REGISTRE_DES_DECISIONS.md
+│   ├── sessions/                # Une entrée analysée par session
+│   └── transcripts/             # Transcriptions brutes exportées automatiquement
+├── candidature/garage-iag-2027/ # Préparation de la candidature à la résidence
+├── _DEV_/                       # Preview locale (index.html + réponses simulées), backups
+├── .claude/hooks/export_transcript.py  # Export automatique des transcriptions
 └── REPRISE_SESSION_PROCHAINE.md  # État de la dernière session pour reprise de contexte
 ```
+
+Preview locale : `python3 -m http.server 8765 --bind 127.0.0.1` à la racine, puis `http://127.0.0.1:8765/_DEV_/index.html` (réponses simulées, aucun appel API).
 
 ### Composants React (dans le single file)
 
@@ -206,6 +231,13 @@ palimpsest/
   - Cooldown 5s + rate limit 3/min actifs
 - **FEEDBACK P1 consigné** : divergence GDD §10 `fetch` direct vs artifact CORS → fallback runtime. À arbitrer Phase 6.
 - Validation manuelle artifact + cycle réécriture API = non testés (Phase 2)
+
+### Session 2 - Reprise après 6 mois, journal, candidature (2026-10-07, Claude Opus 5.5)
+- Travail non consigné d'avril retrouvé (preview locale `_DEV_/`, réponses simulées, 3 correctifs) ; validé dans la preview ; régression du `pulse` corrigée (commit `80ff970`)
+- Nordine rend explicitement la direction créative à Claude ; décision : GDD v1 gelé, révisions dans une couche v2
+- Mise en place du journal de l'expérimentation (protocole permanent + export automatique des transcriptions)
+- Préparation de la candidature Garage IAG 2027 (date limite 15/11/2026)
+- Détail et analyse : `journal/sessions/2026-10-07_session-02.md`
 
 ## Points d'attention
 - **Rate limiting API** : 3 appels/minute max côté jeu. Prévoir feedback visuel "le monde réfléchit..." pendant le chargement.
