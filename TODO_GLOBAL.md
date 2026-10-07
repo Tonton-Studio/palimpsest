@@ -31,7 +31,7 @@
 - [x] Appel API (fallback `window.claude.complete` ↔ fetch api.anthropic.com, model claude-sonnet-4-20250514, max_tokens 1000) — voir `// FEEDBACK:` dans le code
 - [x] Parsing JSON de la réponse (visual_changes, connection_changes, side_effects, companion_reaction, paradox)
 - [x] Application naïve des visual_changes au rendu SVG (mergeVisuals + validation enum/bornes)
-- [ ] Validation manuelle dans un artifact Claude.ai ou via preview HTML
+- [x] Validation manuelle via preview HTML locale (`_DEV_/index.html`, réponses simulées) — 2026-10-07
 - [ ] Test réel d'un cycle réécriture complet avec API vivante
 
 ## Phase 2 — Monde vivant (3-4h)

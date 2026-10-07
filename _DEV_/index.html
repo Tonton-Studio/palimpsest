@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PALIMPSEST — preview dev</title>
+  <style>
+    html, body, #root { margin: 0; padding: 0; height: 100%; background: #0A0A0F; }
+    body { font-family: -apple-system, sans-serif; color: #E8E4D9; }
+    #dev-error {
+      position: fixed; inset: 0; z-index: 9999;
+      display: none;
+      background: #0A0A0F;
+      padding: 2rem; overflow: auto;
+      white-space: pre-wrap;
+      font-family: ui-monospace, Menlo, monospace;
+      font-size: 0.9rem;
+      color: #ff6b6b;
+    }
+    #dev-badge {
+      position: fixed; bottom: 0.5rem; left: 0.5rem; z-index: 9998;
+      font-family: ui-monospace, Menlo, monospace;
+      font-size: 0.7rem; color: #E8E4D9; opacity: 0.25;
+      pointer-events: none;
+      letter-spacing: 0.1em;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <div id="dev-badge">DEV — STUB API</div>
+  <pre id="dev-error"></pre>
+
+  <!-- React 18 UMD (globals: React, ReactDOM) -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+  <!-- Babel standalone pour transpiler le JSX au runtime -->
+  <script src="https://unpkg.com/@babel/standalone@7.25.6/babel.min.js"></script>
+
+  <!-- Banque de réponses stub (expose window.PALIMPSEST_STUB) -->
+  <script src="./stub_responses.js"></script>
+
+  <!-- Bootstrapper : fetch du .jsx, strip ESM, transpile, eval, render -->
+  <script>
+    (async () => {
+      try {
+        const resp = await fetch('../src/Palimpsest.jsx', { cache: 'no-store' });
+        if (!resp.ok) throw new Error(`fetch Palimpsest.jsx → ${resp.status}`);
+        const raw = await resp.text();
+
+        // Strip ESM : React devient un global (UMD), export default devient une assignation window.
+        const stripped = raw
+          .replace(/^\s*import\s+.*from\s+['"]react['"]\s*;?\s*$/gm, '// [stripped-import]')
+          .replace(/^\s*export\s+default\s+function\s+Palimpsest/m, 'window.__Palimpsest = function Palimpsest');
+
+        // Destructure des hooks React depuis le global avant exécution.
+        const prelude =
+          'const { useReducer, useEffect, useCallback, useMemo } = React;\n' +
+          '// --- Palimpsest.jsx source ---\n';
+
+        const source = prelude + stripped;
+        const { code } = Babel.transform(source, { presets: ['react'], filename: 'Palimpsest.jsx' });
+
+        // eval dans le scope global
+        (new Function(code))();
+
+        if (typeof window.__Palimpsest !== 'function') {
+          throw new Error('window.__Palimpsest introuvable après eval — vérifier export default function Palimpsest()');
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(React.createElement(window.__Palimpsest));
+        console.log('[PALIMPSEST:dev] rendu prêt. window.PALIMPSEST_STUB =', typeof window.PALIMPSEST_STUB);
+      } catch (err) {
+        console.error('[PALIMPSEST:dev] ERREUR', err);
+        const box = document.getElementById('dev-error');
+        box.style.display = 'block';
+        box.textContent = 'ERREUR PREVIEW DEV\n\n' + (err && err.stack || err);
+      }
+    })();
+  </script>
+</body>
+</html>

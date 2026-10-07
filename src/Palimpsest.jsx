@@ -391,6 +391,12 @@ function applyConnectionChanges(current, changes) {
 // avec fallback fetch pour distribution standalone (itch.io). À arbitrer en fin de Phase 6.
 
 async function callInterpretation({ chamberName, chamberTheme, originalInscription, playerInscription, allInscriptions }) {
+  // Mode DEV LOCAL : si _DEV_/stub_responses.js est chargé, on court-circuite l'API réelle.
+  // Voir _DEV_/index.html — aucun appel réseau, aucun coût, tous les chemins visuels exerçables.
+  if (typeof window !== "undefined" && typeof window.PALIMPSEST_STUB === "function") {
+    return window.PALIMPSEST_STUB({ chamberName, chamberTheme, originalInscription, playerInscription, allInscriptions });
+  }
+
   const filledPrompt = INTERPRETATION_SYSTEM_PROMPT
     .replace("{chamber_name}", chamberName)
     .replace("{chamber_theme}", chamberTheme)
@@ -560,9 +566,8 @@ function Shape({ idx, t, seed, kind, behavior, color, opacity, speedMul, distort
           <animateTransform attributeName="transform" type="translate" values={`-50,0; 1050,0; -50,0`} dur={`${baseDur * 1.5}s`} repeatCount="indefinite" begin={`${t * baseDur}s`} />
         );
       case "pulse":
-        return (
-          <animateTransform attributeName="transform" type="scale" values="1;1.2;1" dur={`${baseDur / 2}s`} repeatCount="indefinite" additive="sum" />
-        );
+        // Animation CSS via `pulseStyle` sur le <g> englobant (scale autour du centre de la forme)
+        return null;
       case "scatter":
         return (
           <animateTransform attributeName="transform" type="translate" values={`0,0; ${(seed % 2 ? 1 : -1) * 40},${(seed % 3 - 1) * 40}; 0,0`} dur={`${baseDur}s`} repeatCount="indefinite" />
@@ -585,12 +590,19 @@ function Shape({ idx, t, seed, kind, behavior, color, opacity, speedMul, distort
     <animate attributeName="opacity" values={`${opacity};${Math.max(0, opacity - 0.15)};${opacity}`} dur={`${baseDur}s`} repeatCount="indefinite" begin={`${t * baseDur}s`} />
   );
 
-  const common = { fill: color, fillOpacity: opacity, stroke: "none" };
+  // Pulse via CSS (transform-box: fill-box) pour scaler autour du centre propre de la forme,
+  // au lieu du SMIL scale additif qui partait de (0,0) SVG et faisait voler les formes.
+  // Posé sur le <g> englobant : line, wave et spiral n'utilisent pas `common`.
+  const pulseStyle = behavior === "pulse"
+    ? { transformBox: "fill-box", transformOrigin: "center", animation: `palimpsestShapePulse ${baseDur / 2}s ease-in-out infinite` }
+    : undefined;
+
+  const common = { fill: color, stroke: "none" };
 
   switch (kind) {
     case "circle":
       return (
-        <g>
+        <g style={pulseStyle}>
           <circle cx={cx} cy={cy} r={size / 2} {...common}>
             {opacityAnim}
             {animTransform}
@@ -599,7 +611,7 @@ function Shape({ idx, t, seed, kind, behavior, color, opacity, speedMul, distort
       );
     case "square":
       return (
-        <g>
+        <g style={pulseStyle}>
           <rect x={cx - size / 2} y={cy - size / 2} width={size} height={size} {...common}>
             {opacityAnim}
             {animTransform}
@@ -609,7 +621,7 @@ function Shape({ idx, t, seed, kind, behavior, color, opacity, speedMul, distort
     case "triangle": {
       const p = `${cx},${cy - size / 2} ${cx - size / 2},${cy + size / 2} ${cx + size / 2},${cy + size / 2}`;
       return (
-        <g>
+        <g style={pulseStyle}>
           <polygon points={p} {...common}>
             {opacityAnim}
             {animTransform}
@@ -619,7 +631,7 @@ function Shape({ idx, t, seed, kind, behavior, color, opacity, speedMul, distort
     }
     case "line":
       return (
-        <g>
+        <g style={pulseStyle}>
           <line x1={cx - size} y1={cy} x2={cx + size} y2={cy} stroke={color} strokeOpacity={opacity} strokeWidth="1.2">
             {animTransform}
           </line>
@@ -629,7 +641,7 @@ function Shape({ idx, t, seed, kind, behavior, color, opacity, speedMul, distort
       const amp = 20 + distortion * 40;
       const d = `M 0 ${cy} Q 250 ${cy - amp} 500 ${cy} T 1000 ${cy}`;
       return (
-        <g>
+        <g style={pulseStyle}>
           <path d={d} fill="none" stroke={color} strokeOpacity={opacity} strokeWidth="1">
             <animate attributeName="d" values={`M 0 ${cy} Q 250 ${cy - amp} 500 ${cy} T 1000 ${cy}; M 0 ${cy} Q 250 ${cy + amp} 500 ${cy} T 1000 ${cy}; M 0 ${cy} Q 250 ${cy - amp} 500 ${cy} T 1000 ${cy}`} dur={`${8 / speedMul}s`} repeatCount="indefinite" />
           </path>
@@ -646,11 +658,11 @@ function Shape({ idx, t, seed, kind, behavior, color, opacity, speedMul, distort
           <circle key={r} cx={cx} cy={cy} r={radius} fill="none" stroke={color} strokeOpacity={opacity * (1 - r / (rings + 1))} strokeWidth="1" />
         );
       }
-      return <g>{arr}{animTransform}</g>;
+      return <g style={pulseStyle}>{arr}{animTransform}</g>;
     }
     case "dots": {
       return (
-        <g>
+        <g style={pulseStyle}>
           <circle cx={cx} cy={cy} r={2 + (seed % 3)} {...common}>
             {opacityAnim}
             {animTransform}
@@ -773,7 +785,12 @@ function Ink({ mood, message, onMessageEnd }) {
 
   React.useEffect(() => {
     if (!message) return;
-    const t = setTimeout(onMessageEnd, 8000);
+    // Durée totale = durée du typing (35ms/lettre dans InkMessage) + 8s de lecture post-typing.
+    // Sans ça, pour un message de 150+ chars, le timer expire à la fin du typing et la phrase
+    // disparait avant d'avoir pu être lue.
+    const typingMs = message.length * 35;
+    const readMs = 8000;
+    const t = setTimeout(onMessageEnd, typingMs + readMs);
     return () => clearTimeout(t);
   }, [message, onMessageEnd]);
 
@@ -888,6 +905,10 @@ export default function Palimpsest() {
     dispatch({ type: "SET_CHAMBER", payload: chamberName });
   }, [chambers]);
 
+  // Stable ref : sans useCallback, le useEffect d'Ink réarmait le timer 8s à chaque render
+  // pendant le typing lettre par lettre, bloquant la disparition du message.
+  const clearInkMessage = useCallback(() => dispatch({ type: "CLEAR_INK_MESSAGE" }), []);
+
   const submitRewrite = useCallback(async (newText) => {
     if (!editingInscription) return;
     const now = Date.now();
@@ -942,6 +963,10 @@ export default function Palimpsest() {
           0%, 100% { opacity: 0.85; }
           50% { opacity: 1; }
         }
+        @keyframes palimpsestShapePulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.2); }
+        }
         .palimpsest-inscription {
           animation: palimpsestPulse 4s ease-in-out infinite;
           transition: color 1.2s ease;
@@ -986,7 +1011,7 @@ export default function Palimpsest() {
       <Ink
         mood={companion.mood}
         message={companion.currentMessage}
-        onMessageEnd={() => dispatch({ type: "CLEAR_INK_MESSAGE" })}
+        onMessageEnd={clearInkMessage}
       />
 
       {/* Bouton aide minimaliste */}
