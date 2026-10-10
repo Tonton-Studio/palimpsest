@@ -276,7 +276,9 @@ function reducer(state, action) {
       return {
         ...state,
         ui: { ...state.ui, loading: false, error: action.payload },
-        companion: { mood: "worried", currentMessage: "les mots résistent... réessaie" },
+        companion: SAMPLE_ABSENCE_CODES.has(action.payload)
+          ? { mood: "melancholic", currentMessage: "Personne n'a permis au monde de changer. Les phrases restent où elles sont." }
+          : { mood: "worried", currentMessage: "les mots résistent... réessaie" },
       };
     case "REWRITE_APPLY": {
       const { chamberName, inscriptionId, newText, apiResponse } = action.payload;
@@ -387,8 +389,17 @@ function applyConnectionChanges(current, changes) {
 // API — appel d'interprétation
 // ============================================================
 // FEEDBACK: le GDD §10 spécifie un fetch direct vers api.anthropic.com, mais dans un artifact
-// Claude.ai les appels CORS sortants sont bloqués. On utilise window.claude.complete quand disponible,
-// avec fallback fetch pour distribution standalone (itch.io). À arbitrer en fin de Phase 6.
+// Claude.ai les appels CORS sortants sont bloqués. Ordre retenu le 2026-10-07 (journal, registre ligne 19) :
+//   1. réponses simulées de la preview locale (_DEV_/stub_responses.js) ;
+//   2. page publiée sur Claude.ai : capacité `sample`, Claude répond sur le compte du joueur,
+//      qui donne son accord au premier appel. Le modèle se choisit par palier, plus par identifiant ;
+//   3. ancienne API des artifacts de conversation (window.claude.complete) ;
+//   4. fetch direct : n'aboutit pas en l'état (ni clé API ni en-tête de version). À arbitrer pour itch.io en Phase 6.
+
+// Codes d'erreur de `sample` qui signifient : ce joueur ne peut pas (ou n'a pas voulu) laisser Claude réécrire le monde.
+const SAMPLE_ABSENCE_CODES = new Set([
+  "not_granted", "sampling_disabled", "not_declared", "capability_disabled", "capability_removed", "session_expired",
+]);
 
 async function callInterpretation({ chamberName, chamberTheme, originalInscription, playerInscription, allInscriptions }) {
   // Mode DEV LOCAL : si _DEV_/stub_responses.js est chargé, on court-circuite l'API réelle.
@@ -404,10 +415,25 @@ async function callInterpretation({ chamberName, chamberTheme, originalInscripti
     .replace("{player_inscription}", playerInscription)
     .replace("{all_current_inscriptions}", JSON.stringify(allInscriptions));
 
+  const runtime = typeof window !== "undefined" ? window.claude : undefined;
+
+  if (runtime && typeof runtime.use === "function") {
+    const sample = await runtime.use("sample");
+    if (!sample) throw { code: "not_granted", message: "capacité sample indisponible dans cette vue" };
+    const startedAt = Date.now();
+    // Palier "default" : Claude réfléchit avant de répondre (5 à 60 s). L'interprétation est le coeur du jeu.
+    const data = await sample.json(filledPrompt, { modelTier: "default" });
+    console.info(`[PALIMPSEST] interprétation reçue en ${Date.now() - startedAt} ms`);
+    if (!data || typeof data !== "object" || Array.isArray(data)) {
+      throw { code: "invalid_json", message: "la réponse n'est pas un objet JSON" };
+    }
+    return data;
+  }
+
   let rawText = null;
 
-  if (typeof window !== "undefined" && window.claude && typeof window.claude.complete === "function") {
-    rawText = await window.claude.complete(filledPrompt);
+  if (runtime && typeof runtime.complete === "function") {
+    rawText = await runtime.complete(filledPrompt);
   } else {
     const resp = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -946,14 +972,16 @@ export default function Palimpsest() {
       });
     } catch (err) {
       console.warn("[PALIMPSEST] interpretation error", err);
-      dispatch({ type: "REWRITE_ERROR", payload: String(err?.message || err) });
+      // `sample` rejette un objet {code, message} : on garde le code pour choisir la réplique de L'Encre.
+      dispatch({ type: "REWRITE_ERROR", payload: err?.code || String(err?.message || err) });
     }
   }, [currentChamber, chamber, editingInscription, chambers, ui.lastRewriteAt, ui.rewriteTimestamps]);
 
   return (
     <div style={{
       position: "relative",
-      width: "100%", height: "100vh", minHeight: "520px",
+      // 100% plutôt que 100vh : la page publiée réserve les marges de sécurité des téléphones.
+      width: "100%", height: "100%", minHeight: "520px",
       background: chamber.visuals.background_color || PALETTE.bg,
       overflow: "hidden",
       transition: "background 2.5s ease-in-out",

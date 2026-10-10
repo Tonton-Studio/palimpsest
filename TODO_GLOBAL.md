@@ -32,7 +32,7 @@
 - [x] Parsing JSON de la réponse (visual_changes, connection_changes, side_effects, companion_reaction, paradox)
 - [x] Application naïve des visual_changes au rendu SVG (mergeVisuals + validation enum/bornes)
 - [x] Validation manuelle via preview HTML locale (`_DEV_/index.html`, réponses simulées) — 2026-10-07
-- [ ] Test réel d'un cycle réécriture complet avec API vivante
+- [x] Test réel d'un cycle réécriture complet avec API vivante — page publiée le 2026-10-07 (https://claude.ai/artifact/YUQcKR8eQaxNmbyhBFxxkV, capacité `sample`), essai concluant de Nordine signalé le 2026-10-10. **Phase 1 terminée.**
 
 ## Phase 2 — Monde vivant (3-4h)
 - [ ] 7 Chambres avec visuels SVG distincts (SEUIL, GRAVITÉ, TEMPS, SILENCE, MIROIR, ÉCHO, PROFONDEUR)

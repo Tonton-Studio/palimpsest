@@ -2,8 +2,8 @@
 
 ## Project Overview
 PALIMPSEST v1.0 - Jeu d'exploration contemplative où le monde est écrit en langage naturel et où réécrire ses règles le transforme
-Stack: React (JSX) + SVG + CSS Animations + API Anthropic (claude-sonnet-4-20250514) + window.storage (persistent storage)
-Target: Web (artifact React Claude.ai en primaire, itch.io export HTML en secondaire)
+Stack: React (JSX) + SVG + CSS Animations + Claude via la capacité `sample` des pages Claude.ai (depuis le 2026-10-07 ; GDD v1 : API Anthropic claude-sonnet-4-20250514) + persistance à câbler en Phase 4 (capacité `db`, successeur de window.storage)
+Target: Web (page Artifact publiée sur Claude.ai en primaire : https://claude.ai/artifact/YUQcKR8eQaxNmbyhBFxxkV, privée ; itch.io export HTML en secondaire)
 
 ## Game Vision
 - **Pitch**: "Un monde écrit en phrases. Réécris-les. Observe ce qui change. Il n'y a rien à gagner. Il y a à comprendre."
@@ -12,6 +12,7 @@ Target: Web (artifact React Claude.ai en primaire, itch.io export HTML en second
 - **Monetization**: Gratuit. Open source (MIT). Pay-what-you-want optionnel sur itch.io.
 - **GDD**: PALIMPSEST_GDD.md (SSOT game design, conçu intégralement par Claude Opus 4.6)
 - **Expérience**: Jeu conçu par une IA pour elle-même, réalisé fidèlement par un humain sans modification de la vision créative
+- **PUBLIC CIBLE : LES IA** (intention fondatrice de Nordine, précisée le 2026-10-08, registre ligne 22). Le jeu est fait par une IA *pour les IA*. Le GDD v1 (gelé) conçoit pourtant son interface pour un joueur humain : l'écart est à traiter dans la couche v2. Ne plus rien décider sur le jeu ou la candidature sans tenir compte de ce point.
 
 ## Critical Rules
 - **Claude est le directeur créatif. Nordine exécute.** Depuis le 2026-10-07, Nordine l'a confirmé explicitement : « c'est toi qui décide puisque c'est TON jeu ». Claude **tranche lui-même** les questions créatives (visuel, texte, game design) et ne les renvoie pas à Nordine. Il le consulte sur l'agenda, l'administratif et ce qui engage Nordine personnellement.
@@ -21,9 +22,9 @@ Target: Web (artifact React Claude.ai en primaire, itch.io export HTML en second
 - **Le silence est un matériau.** Ne pas remplir les vides.
 - **Zéro tutoriel, zéro tooltip.** Le jeu se découvre par l'expérimentation.
 - Tout le texte in-game est en **français**.
-- Le jeu doit tourner en **single file .jsx** (artifact React Claude.ai).
-- Les appels API Anthropic utilisent **claude-sonnet-4-20250514**, max_tokens 1000.
-- Persistance via **window.storage** (clé principale : `palimpsest-world`).
+- La source du jeu reste **un seul fichier `src/Palimpsest.jsx`**. La page publiée est un produit de build : `node _DEV_/build_artifact.mjs` puis publication de `dist/palimpsest.html` avec `capabilities: {sample: {}}` (même chemin de fichier = même URL).
+- L'interprétation passe par **`sample.json(prompt, {modelTier: "default"})`** sur la page publiée (décision du 2026-10-07, registre ligne 19). Le GDD v1 citait claude-sonnet-4-20250514, max_tokens 1000 : ces valeurs ne valent plus que pour un éventuel appel direct (itch.io, Phase 6).
+- Persistance (Phase 4) : `window.storage` n'existe plus sur les pages publiées ; son successeur est la capacité **`db`** (état privé par joueur). Clé logique conservée : `palimpsest-world`.
 
 ## Journal de l'expérimentation — PROTOCOLE PERMANENT (depuis le 2026-10-07)
 
@@ -36,7 +37,7 @@ L'expérience (une IA dirige, un humain exécute) compte autant que le jeu. **Ch
 5. **Clôture** à `/tts_handover` ou `/tts_sanctuarize` ; **lecture** à `/tts_takeover` (registre + dernière entrée, à compléter si elle n'a pas été close).
 
 ## Candidature Garage IAG 2027
-Nordine candidate avec PALIMPSEST à la résidence Garage IAG 2027 (Game Créalab, Bordeaux, soutien CNC). Date limite officielle : 15 novembre 2026 à minuit ; **dépôt prévu le 6 novembre** (décision de Nordine). Préparation : `candidature/garage-iag-2027/README.md` (**local, jamais versionné**). Dates de résidence marquées `[TBD]` dans l'agenda jusqu'aux résultats du 15 décembre.
+Nordine candidate avec PALIMPSEST à la résidence Garage IAG 2027 (Game Créalab, Bordeaux, soutien CNC). Date limite officielle : 15 novembre 2026 à minuit ; **dépôt prévu le 3 novembre, le 6 en secours** (décision de Nordine, registre ligne 26). Préparation : `candidature/garage-iag-2027/README.md` (**local, jamais versionné**). Dates de résidence marquées `[TBD]` dans l'agenda jusqu'aux résultats du 15 décembre.
 
 **Publication (option B)** : code, GDD, entrées du journal et registre deviendront publics avant le dépôt, après relecture du journal par Nordine. Transcriptions brutes et candidature restent privées.
 
@@ -62,7 +63,7 @@ palimpsest/
 └── REPRISE_SESSION_PROCHAINE.md  # État de la dernière session pour reprise de contexte
 ```
 
-Preview locale : `python3 -m http.server 8765 --bind 127.0.0.1` à la racine, puis `http://127.0.0.1:8765/_DEV_/index.html` (réponses simulées, aucun appel API).
+Preview locale : `python3 -m http.server 8765 --bind 127.0.0.1` à la racine, puis `http://127.0.0.1:8765/_DEV_/index.html` (réponses simulées, aucun appel API). Page construite : `http://127.0.0.1:8765/dist/palimpsest.local.html` (hors de Claude.ai, sans Claude : L'Encre répond « les mots résistent »).
 
 ### Composants React (dans le single file)
 
