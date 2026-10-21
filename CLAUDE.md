@@ -39,7 +39,7 @@ L'expérience (une IA dirige, un humain exécute) compte autant que le jeu. **Ch
 5. **Clôture** à `/tts_handover` ou `/tts_sanctuarize` ; **lecture** à `/tts_takeover` (registre + dernière entrée, à compléter si elle n'a pas été close).
 
 ## Candidature Garage IAG 2027
-Nordine candidate avec PALIMPSEST à la résidence Garage IAG 2027 (Game Créalab, Bordeaux, soutien CNC). Date limite officielle : 15 novembre 2026 à minuit ; **dépôt prévu le 3 novembre, le 6 en secours** (décision de Nordine, registre ligne 26). Préparation : `candidature/garage-iag-2027/README.md` (**local, jamais versionné**). Dates de résidence marquées `[TBD]` dans l'agenda jusqu'aux résultats du 15 décembre.
+Nordine candidate avec PALIMPSEST à la résidence Garage IAG 2027 (Game Créalab, Bordeaux, soutien CNC). Date limite officielle : 15 novembre 2026 à minuit ; **dépôt prévu le 3 novembre, le 4 après-midi en secours** (décision de Nordine, registre ligne 26 ; le 6, prévu au départ, n'est plus disponible depuis le 20 octobre). Depuis le 21 octobre, le dossier est en bas des priorités de Nordine (registre, ligne 34) : Claude fait tout ce qui ne demande ni sa voix ni sa signature. Préparation : `candidature/garage-iag-2027/README.md` (**local, jamais versionné**). Dates de résidence marquées `[TBD]` dans l'agenda jusqu'aux résultats du 15 décembre.
 
 **Publication (option B)** : code, GDD, entrées du journal et registre deviendront publics avant le dépôt, après relecture du journal par Nordine. Transcriptions brutes et candidature restent privées.
 
@@ -255,6 +255,12 @@ Preview locale : `python3 -m http.server 8765 --bind 127.0.0.1` à la racine, pu
 - Premier joueur IA : deepseek-r1 (7B, local) ne joue pas, il prend le monde pour la question d'un utilisateur
 - Export des transcriptions corrigé (le résumé de compaction était attribué à Nordine)
 - Détail et analyse : `journal/sessions/2026-10-19_session-04.md`
+
+### Session 5 - Dossier de candidature, première partie de Claude (2026-10-21, Claude Opus 5.5)
+- Premier jet du sujet d'expérimentation et de la fiche projet, PDF 1 aux couleurs de Tonton Studio (candidature, privé)
+- Première vraie partie de Claude dans REGARDER : deux réécritures en onze ou douze gestes, SILENCE laissé vide ; la page ne garde pas la marge (registre, ligne 38)
+- Agenda et cartes du tableau de bord de Nordine mis à jour par Claude, avec son accord
+- Détail et analyse : `journal/sessions/2026-10-21_session-05.md`
 
 ## Points d'attention
 - **Rate limiting API** : 3 appels/minute max côté jeu. Prévoir feedback visuel "le monde réfléchit..." pendant le chargement.
