@@ -5,7 +5,9 @@ Called by the Stop and SessionEnd hooks (JSON on stdin with transcript_path and
 session_id), or by hand: python3 -I export_transcript.py <transcript.jsonl>
 
 Keeps: the human's messages, Claude's text replies, one line per tool call,
-token usage. Drops: internal reasoning, raw tool output, screenshots, system
+token usage, and context compactions (the summary Claude wrote of the conversation,
+which Claude Code then feeds back as a user turn: it is labelled as Claude's, never
+as the human's). Drops: internal reasoning, raw tool output, screenshots, system
 reminders. Masks API keys and similar secrets. Never fails the hook: exits 0.
 """
 import json
@@ -28,7 +30,8 @@ SECRET_PATTERNS = [
     re.compile(r"xox[abprs]-[A-Za-z0-9\-]{10,}"),
     re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?-----END [A-Z ]*PRIVATE KEY-----"),
 ]
-REMINDER = re.compile(r"<system-reminder>[\s\S]*?</system-reminder>")
+# System reminders and background-task notifications reach the model as user turns: they are not the human.
+REMINDER = re.compile(r"<(system-reminder|task-notification)>[\s\S]*?</\1>")
 COMMAND = re.compile(r"<command-name>([^<]*)</command-name>[\s\S]*?(?:<command-args>([^<]*)</command-args>)?")
 
 
@@ -81,6 +84,10 @@ def parse(path):
             if t:
                 first = first or t
                 last = t
+            if kind == "system" and o.get("subtype") == "compact_boundary":
+                meta = o.get("compactMetadata") or {}
+                events.append(("compact", t, (meta.get("preTokens"), meta.get("postTokens"))))
+                continue
             if kind == "user":
                 content = msg.get("content")
                 if isinstance(content, list):
@@ -94,6 +101,9 @@ def parse(path):
                             bits.append("[image jointe]")
                     content = "\n".join(bits)
                 if not isinstance(content, str) or "<local-command-stdout>" in content:
+                    continue
+                if o.get("isCompactSummary"):
+                    events.append(("summary", t, clean(content)))
                     continue
                 m = COMMAND.search(content)
                 text = f"Commande `{m.group(1).strip()}` {(m.group(2) or '').strip()}".strip() if m else clean(content)
@@ -122,6 +132,7 @@ def render(session_id, events, usage, models, first, last, requests):
     n_h = sum(1 for e in events if e[0] == "human")
     n_c = sum(1 for e in events if e[0] == "claude")
     n_t = sum(1 for e in events if e[0] == "tool")
+    n_k = sum(1 for e in events if e[0] == "compact")
     fmt = "%Y-%m-%d %H:%M"
 
     def num(n):
@@ -138,17 +149,32 @@ def render(session_id, events, usage, models, first, last, requests):
         "",
         f"- Début : {first.strftime(fmt) if first else '?'} · dernière activité : {last.strftime(fmt) if last else '?'}",
         f"- Modèle(s) : {', '.join(sorted(models)) or '?'}",
-        f"- Messages de Nordine : {n_h} · réponses de Claude : {n_c} · actions : {n_t} · requêtes API : {requests}",
+        f"- Messages de Nordine : {n_h} · réponses de Claude : {n_c} · actions : {n_t} · requêtes API : {requests}"
+        + (f" · compactions du contexte : {n_k}" if n_k else ""),
         f"- Tokens : {num(usage['in'] + usage['cache_write'] + usage['cache_read'])} en entrée "
         f"(dont {num(usage['cache_read'])} relus en cache, {num(usage['cache_write'])} écrits en cache), "
         f"{num(usage['out'])} en sortie",
         "",
         "---",
     ]
-    prev = None
+    prev, day = None, first.date() if first else None
     for kind, t, text in events:
+        # The date appears in a heading whenever the day changes: a session can span days.
         hhmm = t.strftime("%H:%M") if t else ""
-        if kind == "human":
+        if t and t.date() != day:
+            day = t.date()
+            hhmm = t.strftime("%Y-%m-%d %H:%M")
+            prev = None
+        if kind == "compact":
+            pre, post = text
+            sizes = f" ({num(pre)} tokens ramenés à {num(post)})" if pre and post else ""
+            out += ["", f"## Compaction du contexte — {hhmm}", "",
+                    f"> Le contexte de la conversation{sizes} a été remplacé par un résumé que Claude a rédigé "
+                    "lui-même. Claude Code le lui a ensuite renvoyé comme un message de l'utilisateur : "
+                    "ce n'est pas un message de Nordine. La suite de la session part de ce résumé seul."]
+        elif kind == "summary":
+            out += ["", "<details><summary>Résumé rédigé par Claude</summary>", "", text, "", "</details>"]
+        elif kind == "human":
             out += ["", f"## Nordine — {hhmm}", "", text]
         elif kind == "claude":
             if prev != "claude-block":
@@ -158,7 +184,7 @@ def render(session_id, events, usage, models, first, last, requests):
             if prev != "claude-block":
                 out += ["", f"### Claude — {hhmm}"]
             out += ["", f"> action : {text}"]
-        prev = "human" if kind == "human" else "claude-block"
+        prev = "claude-block" if kind in ("claude", "tool") else kind
     return "\n".join(out) + "\n"
 
 
