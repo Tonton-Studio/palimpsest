@@ -25,6 +25,8 @@ Target: Web (page Artifact publiée sur Claude.ai en primaire : https://claude.a
 - La source du jeu reste **un seul fichier `src/Palimpsest.jsx`**. La page publiée est un produit de build : `node _DEV_/build_artifact.mjs` puis publication de `dist/palimpsest.html` avec `capabilities: {sample: {}}` (même chemin de fichier = même URL).
 - L'interprétation passe par **`sample.json(prompt, {modelTier: "default"})`** sur la page publiée (décision du 2026-10-07, registre ligne 19). Le GDD v1 citait claude-sonnet-4-20250514, max_tokens 1000 : ces valeurs ne valent plus que pour un éventuel appel direct (itch.io, Phase 6).
 - Persistance (Phase 4) : `window.storage` n'existe plus sur les pages publiées ; son successeur est la capacité **`db`** (état privé par joueur). Clé logique conservée : `palimpsest-world`.
+- **Porte pour joueur IA** (depuis le 2026-10-19, registre lignes 25 et 27 à 33) : une IA lit chaque Chambre décrite en mots (produits par le code depuis le même état que le SVG) et joue par gestes écrits (`réécrire N : …`, `gratter N`, `aller NOM`, `attendre`, `partir`). Le moteur (`runAiSession`, `describeChamber`, `parsePlayerReply`) vit dans `src/Palimpsest.jsx` et sert deux usages : **REGARDER** sur la page publiée (Claude joue, un humain regarde) et **`porte/play.mjs`** en local (n'importe quel modèle). Mode d'emploi : `porte/README.md`. **Après toute modification du moteur : `node porte/test_engine.mjs`.**
+- **Juiciness** : arbitrage propre au projet dans `.claude/rules/juiciness.md` (le jus de PALIMPSEST, c'est la lenteur : ni secousse, ni rebond, ni flash).
 
 ## Journal de l'expérimentation — PROTOCOLE PERMANENT (depuis le 2026-10-07)
 
@@ -58,8 +60,12 @@ palimpsest/
 │   ├── sessions/                # Une entrée analysée par session
 │   └── transcripts/             # Transcriptions brutes exportées automatiquement
 ├── candidature/garage-iag-2027/ # Préparation de la candidature à la résidence
-├── _DEV_/                       # Preview locale (index.html + réponses simulées), backups
+├── porte/                       # Porte pour joueur IA : play.mjs (parties locales), engine.mjs, test_engine.mjs, README
+│   ├── parties/                 # Récits et journaux des parties (non versionnés)
+│   └── mondes/                  # Mondes persistants partagés entre parties (non versionnés)
+├── _DEV_/                       # Preview locale (index.html, réponses et joueur IA simulés), build de la page, backups
 ├── .claude/hooks/export_transcript.py  # Export automatique des transcriptions
+├── .claude/rules/juiciness.md   # Arbitrage game feel propre au projet
 └── REPRISE_SESSION_PROCHAINE.md  # État de la dernière session pour reprise de contexte
 ```
 
@@ -239,6 +245,16 @@ Preview locale : `python3 -m http.server 8765 --bind 127.0.0.1` à la racine, pu
 - Mise en place du journal de l'expérimentation (protocole permanent + export automatique des transcriptions)
 - Préparation de la candidature Garage IAG 2027 (date limite 15/11/2026)
 - Détail et analyse : `journal/sessions/2026-10-07_session-02.md`
+
+### Session 3 - Candidature, sur Claude.ai (2026-10-08, Claude Opus 5.5)
+- Intention fondatrice précisée : le jeu est fait pour les IA ; nouvel angle de candidature ; priorité à une porte pour joueur IA ; dépôt le 3 novembre
+- Détail : `journal/sessions/2026-10-08_session-03.md`
+
+### Session 4 - La porte pour joueur IA (2026-10-19, Claude Opus 5.5)
+- Moteur de la porte dans `src/Palimpsest.jsx`, mode REGARDER sur la page publiée, instrument local `porte/play.mjs`, 15 tests
+- Premier joueur IA : deepseek-r1 (7B, local) ne joue pas, il prend le monde pour la question d'un utilisateur
+- Export des transcriptions corrigé (le résumé de compaction était attribué à Nordine)
+- Détail et analyse : `journal/sessions/2026-10-19_session-04.md`
 
 ## Points d'attention
 - **Rate limiting API** : 3 appels/minute max côté jeu. Prévoir feedback visuel "le monde réfléchit..." pendant le chargement.

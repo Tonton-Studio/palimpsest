@@ -34,6 +34,18 @@
 - [x] Validation manuelle via preview HTML locale (`_DEV_/index.html`, réponses simulées) — 2026-10-07
 - [x] Test réel d'un cycle réécriture complet avec API vivante — page publiée le 2026-10-07 (https://claude.ai/artifact/YUQcKR8eQaxNmbyhBFxxkV, capacité `sample`), essai concluant de Nordine signalé le 2026-10-10. **Phase 1 terminée.**
 
+## Porte pour joueur IA — priorité avant les Phases 2 et 3 (registre, ligne 25)
+- [x] Description en mots de chaque Chambre, depuis l'état qui alimente le SVG (2026-10-19)
+- [x] Gestes du joueur IA : réécrire, gratter, aller, attendre, partir ; moteur de partie partagé (2026-10-19)
+- [x] REGARDER sur la page publiée : Claude joue, l'humain regarde, puis reprend la main (2026-10-19, essayé avec un joueur simulé)
+- [x] Instrument local `porte/play.mjs`, multi-fournisseurs, récit et coût par partie, mondes persistants (2026-10-19)
+- [x] Tests du moteur sans modèle : `node porte/test_engine.mjs` (15 cas)
+- [x] Première vraie partie de Claude dans REGARDER (2026-10-21, pilotée par Claude Code avec l'accord de Nordine) : deux réécritures en onze ou douze gestes, récit dans `porte/parties/2026-10-21_regarder_claude/`
+- [ ] REGARDER garde la partie (marges, gestes, réponses de l'interprète) et la propose à l'humain à la fin : la page ne montre que la dernière marge, et la première partie n'a pu être relevée qu'à moitié
+- [ ] Parties d'autres modèles : un modèle ouvert français (Mistral), un petit modèle local, un modèle d'un autre laboratoire
+- [ ] Un monde « commun » réécrit tour à tour par plusieurs modèles, puis par un humain
+- [ ] Choisir les parties à garder (versionnées à la main) pour le dossier et le journal
+
 ## Phase 2 — Monde vivant (3-4h)
 - [ ] 7 Chambres avec visuels SVG distincts (SEUIL, GRAVITÉ, TEMPS, SILENCE, MIROIR, ÉCHO, PROFONDEUR)
 - [ ] Mots-liens (capitales, letter-spacing 0.3em) et navigation inter-Chambres

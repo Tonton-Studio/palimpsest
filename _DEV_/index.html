@@ -28,7 +28,7 @@
 </head>
 <body>
   <div id="root"></div>
-  <div id="dev-badge">DEV — STUB API</div>
+  <div id="dev-badge">DEV — STUB API · JOUEUR IA SIMULÉ</div>
   <pre id="dev-error"></pre>
 
   <!-- React 18 UMD (globals: React, ReactDOM) -->
@@ -41,6 +41,9 @@
   <!-- Banque de réponses stub (expose window.PALIMPSEST_STUB) -->
   <script src="./stub_responses.js"></script>
 
+  <!-- Joueur IA simulé pour la porte REGARDER (expose window.PALIMPSEST_PLAYER_STUB) -->
+  <script src="./stub_player.js"></script>
+
   <!-- Bootstrapper : fetch du .jsx, strip ESM, transpile, eval, render -->
   <script>
     (async () => {
@@ -52,7 +55,9 @@
         // Strip ESM : React devient un global (UMD), export default devient une assignation window.
         const stripped = raw
           .replace(/^\s*import\s+.*from\s+['"]react['"]\s*;?\s*$/gm, '// [stripped-import]')
-          .replace(/^\s*export\s+default\s+function\s+Palimpsest/m, 'window.__Palimpsest = function Palimpsest');
+          .replace(/^\s*export\s+default\s+function\s+Palimpsest/m, 'window.__Palimpsest = function Palimpsest')
+          // Exports nommés (moteur partagé avec porte/play.mjs) : sans objet dans la preview.
+          .replace(/^export\s*\{[^}]*\};?.*$/m, '');
 
         // Destructure des hooks React depuis le global avant exécution.
         const prelude =

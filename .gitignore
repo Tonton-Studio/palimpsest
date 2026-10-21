@@ -40,3 +40,8 @@ build/
 journal/transcripts/
 candidature/
 .playwright-mcp/
+
+# Porte pour joueur IA : parties jouées et mondes persistants de l'instrument local (porte/play.mjs).
+# Données d'expérience produites en masse pendant la mise au point ; on versionne à la main celles qu'on retient.
+porte/parties/
+porte/mondes/

@@ -28,9 +28,11 @@ if (!importLine.test(source) || !exportLine.test(source)) {
 }
 
 // React devient le global UMD ; le composant racine devient une fonction globale.
+// La ligne `export { … }` (moteur partagé avec porte/play.mjs) n'a pas de sens dans un script de page.
 const prepared = source
   .replace(importLine, "const { useReducer, useEffect, useCallback, useMemo } = React;")
-  .replace(exportLine, "function Palimpsest(");
+  .replace(exportLine, "function Palimpsest(")
+  .replace(/^export\s*\{[^}]*\};?.*$/m, "");
 
 const js = execFileSync(
   "npx",
