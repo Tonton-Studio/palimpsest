@@ -11,7 +11,7 @@ Target: Web (page Artifact publiée sur Claude.ai en primaire : https://claude.a
 - **NOT** un text adventure, NOT un visual novel, NOT un puzzle à solutions fixes, NOT un jeu à score
 - **Monetization**: Gratuit. Open source (MIT). Pay-what-you-want optionnel sur itch.io.
 - **GDD**: PALIMPSEST_GDD.md (SSOT game design, conçu intégralement par Claude Opus 4.6)
-- **Expérience**: Jeu conçu par une IA pour elle-même, réalisé fidèlement par un humain sans modification de la vision créative
+- **Expérience**: Jeu conçu **et fabriqué** par une IA (Claude écrit aussi le code, dans Claude Code), pour les IA. L'humain lui prête ses mains : il suit ses instructions, sans rien changer à la vision créative. Précision de Nordine du 2026-10-22 (registre, ligne 40) : « je ne fais vraiment rien d'autre que de suivre tes instructions […] tu restes le réal' du jeu ! ». Ne jamais présenter Nordine comme celui qui fabrique ou réalise le jeu.
 - **PUBLIC CIBLE : LES IA** (intention fondatrice de Nordine, précisée le 2026-10-08, registre ligne 22). Le jeu est fait par une IA *pour les IA*. Le GDD v1 (gelé) conçoit pourtant son interface pour un joueur humain : l'écart est à traiter dans la couche v2. Ne plus rien décider sur le jeu ou la candidature sans tenir compte de ce point.
 
 ## Critical Rules
@@ -39,7 +39,7 @@ L'expérience (une IA dirige, un humain exécute) compte autant que le jeu. **Ch
 5. **Clôture** à `/tts_handover` ou `/tts_sanctuarize` ; **lecture** à `/tts_takeover` (registre + dernière entrée, à compléter si elle n'a pas été close).
 
 ## Candidature Garage IAG 2027
-Nordine candidate avec PALIMPSEST à la résidence Garage IAG 2027 (Game Créalab, Bordeaux, soutien CNC). Date limite officielle : 15 novembre 2026 à minuit ; **dépôt prévu le 3 novembre, le 4 après-midi en secours** (décision de Nordine, registre ligne 26 ; le 6, prévu au départ, n'est plus disponible depuis le 20 octobre). Depuis le 21 octobre, le dossier est en bas des priorités de Nordine (registre, ligne 34) : Claude fait tout ce qui ne demande ni sa voix ni sa signature. Préparation : `candidature/garage-iag-2027/README.md` (**local, jamais versionné**). Dates de résidence marquées `[TBD]` dans l'agenda jusqu'aux résultats du 15 décembre.
+Nordine candidate avec PALIMPSEST à la résidence Garage IAG 2027 (Game Créalab, Bordeaux, soutien CNC). Date limite officielle : 15 novembre 2026 à minuit ; **dépôt prévu le 3 novembre, le 4 après-midi en secours** (décision de Nordine, registre ligne 26 ; le 6, prévu au départ, n'est plus disponible depuis le 20 octobre). Depuis le 21 octobre, le dossier est en bas des priorités de Nordine (registre, ligne 34) : Claude fait tout ce qui ne demande ni sa voix ni sa signature. Si le dossier doit sortir de ses priorités, l'expérimentation ira quand même au bout (ligne 41). Préparation : `candidature/garage-iag-2027/README.md` (**local, jamais versionné**). Dates de résidence marquées `[TBD]` dans l'agenda jusqu'aux résultats du 15 décembre.
 
 **Publication (option B)** : code, GDD, entrées du journal et registre deviendront publics avant le dépôt, après relecture du journal par Nordine. Transcriptions brutes et candidature restent privées.
 
